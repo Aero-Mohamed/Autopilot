@@ -24,4 +24,4 @@ for i =2:steps
 end
 
 %% Solving using ODE45
-[t, states] = ode45(@sixDOF,timeSpan,ICs);
+[t, states] = ode45(@DOF6,timeSpan,ICs);

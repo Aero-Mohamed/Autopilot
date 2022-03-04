@@ -1,6 +1,6 @@
 % Function return the set of 12 state of the six degree of freedom
 % system after sub., with given ICs
-function F = sixDOF(~, ICs)
+function F = DOF6(~, ICs)
     Mass = 15;
     Inertia = [1 -2 -1; -2 5 -3; -1 -3 0.1];
     % (Sin, Cos, Tan) of (phi, theta, epsi)
