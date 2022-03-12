@@ -4,7 +4,7 @@ clc; clear; close all;
 % Forces, Moments and Inertia
 
 [Mass, g, I, invI, timeSpan, dt, ICs, ICs_dot0, Vt0, ...
-    dControl, SD_Long, SD_Lat, initialGravity] = Input("Boeing_747_FC 8.xlsx");
+    dControl, SD_Long, SD_Lat, initialGravity] = Input("excelsheet_data_modified.xlsx");
 
 %% Solving
 steps = (timeSpan(2) - timeSpan(1))/dt;
@@ -15,7 +15,7 @@ dForces = [0 ; 0; 0];
 dMoments = [0 ; 0; 0];
 
 for i =1:steps
-    
+    i
     Result(:, i+1) = RBDSolver(Result(:, i), dt, (initialGravity + dForces), dMoments, Mass, I, invI, g);
     
     [dF, dM] = airFrame(SD_Long, SD_Lat, dControl, ICs, ICs_dot0, Result(:, i+1) ,Vt0, ... 
@@ -52,7 +52,7 @@ theta_deg=theta*180/pi;
 psi_deg=psi*180/pi;
 
 figure
-plot3(x,-y,-z);
+plot3(x,y,z);
 title('Trajectory')
 figure
 subplot(4,3,1)
