@@ -1,11 +1,11 @@
 % Function return the set of 12 state of the six degree of freedom
 % system after sub., with given ICs
-function F = DOF6(~, ICs)
-    [forces,Moments,Mass,Inertia,~,~,~] = Input();
+function F = DOF6(ICs, forces, Moments, Mass, Inertia, invI, g)
+
     % (Sin, Cos, Tan) of (phi, theta, epsi)
     [S, C, T] = SCT(ICs(7:9));
     
-    Forces = forces + Mass*9.81*[ 
+    Forces = forces + Mass*g*[ 
         -S.theta; 
         S.phi*C.theta;
         C.phi*C.theta;
@@ -17,7 +17,7 @@ function F = DOF6(~, ICs)
     );
 
     % (p, q, r) dot
-    F(4:6, 1) = Inertia\(Moments - cross(...
+    F(4:6, 1) = invI*(Moments - cross(...
         ICs(4:6, 1), Inertia * ICs(4:6, 1)...
     ));
     

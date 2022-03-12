@@ -1,4 +1,4 @@
-function [Mass, g, I, timeSpan, dt, ICs, ICs_dot0, Vt0, ...
+function [Mass, g, I, invI, timeSpan, dt, ICs, ICs_dot0, Vt0, ...
     dc, SD_Long, SD_Lat, initialGravity] = Input(inputs_filename)
     % Inputs 
     % here B2:B61 means read the excel sheet from cell B2 to cell B61
@@ -31,6 +31,7 @@ function [Mass, g, I, timeSpan, dt, ICs, ICs_dot0, Vt0, ...
     I = [Ixx , -Ixy , -Ixz ;...
         -Ixy , Iyy , -Iyz ;...
         -Ixz , -Iyz , Izz];
+    invI = inv(I);
     
     
     % Stability Derivatives Longitudinal motion
@@ -40,6 +41,7 @@ function [Mass, g, I, timeSpan, dt, ICs, ICs_dot0, Vt0, ...
     SD_Lat_dash = aircraft_data(37:50);
     SD_Lat_dash(9) = SD_Lat_dash(9)*Vt0;    % From dimension-less to dimensional
     SD_Lat_dash(10) = SD_Lat_dash(10)*Vt0;  % Form dimension-less to dimensional
+    
     SD_Lat = LateralSD2BodyAxes(SD_Lat_dash, I);
     
     % initial gravity force

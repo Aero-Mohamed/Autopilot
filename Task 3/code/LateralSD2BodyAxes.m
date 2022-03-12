@@ -1,23 +1,10 @@
 function SD_Lat = LateralSD2BodyAxes(SD_Lat_dash, I)
-    YV      = SD_Lat_dash(1);
-    YB      = SD_Lat_dash(2); 
-    YDA     = SD_Lat_dash(9); 
-    YDR     = SD_Lat_dash(10);
-    
-    LBd     = SD_Lat_dash(3); 
-    NBd     = SD_Lat_dash(4); 
-    LPd     = SD_Lat_dash(5);
-    NPd     = SD_Lat_dash(6);
-    LRd     = SD_Lat_dash(7);
-    NRd     = SD_Lat_dash(8);
-    LDAd    = SD_Lat_dash(11);
-    NDAd    = SD_Lat_dash(12);
-    LDRd    = SD_Lat_dash(13);
-    NDRd    = SD_Lat_dash(14);
+
+    [YV, YB,LBd,NBd,LPd,NPd,LRd,NRd,YDA,YDR,LDAd,NDAd,LDRd,NDRd] = feval(@(x) x{:}, num2cell(SD_Lat_dash));
     
     Ixx = I(1);
     Izz = I(9);
-    Ixz = I(3);
+    Ixz = -I(3);
     
     G = 1/(1 - Ixz^2 / Ixx / Izz);
     
@@ -38,7 +25,7 @@ function SD_Lat = LateralSD2BodyAxes(SD_Lat_dash, I)
         [LB LP LR LDR LDA NB NP NR NDR NDA]);
     
     X = A\B;
-    
+
     SD_Lat = [
         YV YB ...
         X(1) X(6) X(2) X(7) ...
@@ -46,6 +33,7 @@ function SD_Lat = LateralSD2BodyAxes(SD_Lat_dash, I)
         YDA YDR ...
         X(5) X(10) X(4) X(9) ...
     ]';
+
     SD_Lat = vpa(SD_Lat);
     
 end
