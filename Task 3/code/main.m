@@ -4,7 +4,7 @@ clc; clear; close all;
 % Forces, Moments and Inertia
 
 [Mass, g, I, invI, timeSpan, dt, ICs, ICs_dot0, Vt0, ...
-    dControl, SD_Long, SD_Lat, initialGravity] = Input("excelsheet_data_modified.xlsx");
+    dControl, SD_Long, SD_Lat, initialGravity] = Input("NT-33A_4.xlsx");
 
 %% Solving
 steps = (timeSpan(2) - timeSpan(1))/dt;
