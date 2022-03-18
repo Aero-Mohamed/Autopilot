@@ -18,7 +18,7 @@ function [dForce, dMoment] = airFrame(SD_Long, SD_Lat, dControl, state0, state0_
     dbeta = beta-beta0;
     
     dX = Mass*(XU*ds(1)+XW*ds(3)+XDE*De+XD_TH*Dth);
-    dY = Mass*(YV*ds(2)+YB*dbeta+YDA*ds(1)+YDR*Dr);
+    dY = Mass*(YV*ds(2)+YB*dbeta+YDA*Da+YDR*Dr);
     dZ = Mass*(ZU*ds(1)+ZW*ds(3)+ZWD*ds_dot(3)+ZQ*ds(5)+ZDE*De+ZD_TH*Dth);
     
     dL = Ixx*(LB*dbeta+LP*ds(4)+LR*ds(6)+LDR*Dr+LDA*Da);
