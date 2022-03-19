@@ -88,6 +88,7 @@ D_long=zeros(4,2);
 LinearLongSS = ss(A_long, B_long, C_long, D_long);
 LinearLongTF = tf(LinearLongSS);
 
+
 %% APPROXIMATE 
 %% PHUGOID MODE (LONG PERIOD MODE)
 

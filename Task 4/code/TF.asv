@@ -128,10 +128,10 @@ grid on
 figure()
 subplot(1, 2, 1);
 rlocus(LONGT_TF(1,2))
-title('LINEAR FULL MODLE root locus (u/\delta_{th}) ')
+title('LINEAR FULL MODLE root locus (u/\delta_{e}) ')
 subplot(1, 2, 2);
 bode(LONGT_TF(1,2))
-title('LINEAR FULL MODLE bode plot (u/\delta_{th}) ')
+title('LINEAR FULL MODLE bode plot (u/\delta_{e}) ')
 grid on 
 
 %w/de
@@ -148,10 +148,10 @@ grid on
 figure()
 subplot(1, 2, 1);
 rlocus(LONGT_TF(2,2))
-title('LINEAR FULL MODLE root locus (w/\delta_{th}) ')
+title('LINEAR FULL MODLE root locus (w/\delta_{e}) ')
 subplot(1, 2, 2);
 bode(LONGT_TF(2,2))
-title('LINEAR FULL MODLE bode plot (w/\delta_{th}) ')
+title('LINEAR FULL MODLE bode plot (w/\delta_{e}) ')
 grid on 
 
 %q/de
@@ -168,10 +168,10 @@ grid on
 figure()
 subplot(1, 2, 1);
 rlocus(LONGT_TF(3,2))
-title('LINEAR FULL MODLE root locus (q/\delta_{th}) ')
+title('LINEAR FULL MODLE root locus (q/\delta_{e}) ')
 subplot(1, 2, 2);
 bode(LONGT_TF(3,2))
-title('LINEAR FULL MODLE bode plot (q/\delta_{th}) ')
+title('LINEAR FULL MODLE bode plot (q/\delta_{e}) ')
 grid on 
 
 %theta/de
@@ -188,10 +188,10 @@ grid on
 figure()
 subplot(1, 2, 1);
 rlocus(LONGT_TF(4,2))
-title('LINEAR FULL MODLE root locus (\theta/\delta_{th}) ')
+title('LINEAR FULL MODLE root locus (\theta/\delta_{e}) ')
 subplot(1, 2, 2);
 bode(LONGT_TF(4,2))
-title('LINEAR FULL MODLE bode plot (\theta/\delta_{th}) ')
+title('LINEAR FULL MODLE bode plot (\theta/\delta_{e}) ')
 grid on 
 
 %% long period mode (approximate)
@@ -203,7 +203,7 @@ rlocus(PHUG_TF(1,1))
 title('LONG PERIOD MODE root locus (u/\delta_{e}) ')
 subplot(1, 2, 2);
 bode(PHUG_TF(1,1))
-title('LONG PERIOD MODE bode plot (u/\delta_{e}) ')
+title('LONG PERIOD MODE bode plot (u/\delta_{th}) ')
 grid on 
 
 %u/d_th
@@ -220,10 +220,10 @@ grid on
 figure()
 subplot(1, 2, 1);
 rlocus(PHUG_TF(2,1)) 
-title('LONG PERIOD MODE root locus (\theta/\delta_{e}) ')
+title('LONG PERIOD MODE root locus (\theta/\delta_{th}) ')
 subplot(1, 2, 2);
 bode(PHUG_TF(2,1))
-title('LONG PERIOD MODE bode plot (\theta/\delta_{e}) ')
+title('LONG PERIOD MODE bode plot (\theta/\delta_{th}) ')
 grid on 
 
 %theta/d_th
@@ -242,20 +242,20 @@ grid on
 figure()
 subplot(1, 2, 1);
 rlocus(SHORT_TF(1,1)) 
-title('SHORT PERIOD MODE root locus (w/\delta_{e}) ')
+title('SHORT PERIOD MODE root locus (u/\delta_{e}) ')
 subplot(1, 2, 2);
 bode(SHORT_TF(1,1))
-title('SHORT PERIOD MODE bode plot (w/\delta_{e}) ')
+title('SHORT PERIOD MODE bode plot (u/\delta_{e}) ')
 grid on 
 
 %w/d_th
 figure()
 subplot(1, 2, 1);
 rlocus(SHORT_TF(1,2))
-title('SHORT PERIOD MODE root locus (w/\delta_{th}) ')
+title('SHORT PERIOD MODE root locus (w/\delta_{e}) ')
 subplot(1, 2, 2);
 bode(SHORT_TF(1,2))
-title('SHORT PERIOD MODE bode plot (w/\delta_{th}) ')
+title('SHORT PERIOD MODE bode plot (w/\delta_{e}) ')
 grid on 
 
 %q/de
@@ -272,9 +272,9 @@ grid on
 figure()
 subplot(1, 2, 1);
 rlocus(SHORT_TF(2,2))
-title('SHORT PERIOD MODE root locus (q /\delta_{th}) ')
+title('SHORT PERIOD MODE root locus (\theta  /\delta_{e}) ')
 subplot(1, 2, 2);
 bode(SHORT_TF(2,2))
-title('SHORT PERIOD MODE bode plot (q /\delta_{th}) ')
+title('SHORT PERIOD MODE bode plot (\theta /\delta_{e}) ')
 grid on 
 
