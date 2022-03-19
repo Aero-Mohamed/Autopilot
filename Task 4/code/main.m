@@ -88,79 +88,138 @@ D_long=zeros(4,2);
 LongSS = ss(A_long, B_long, C_long, D_long);
 LongTF = tf(LongSS);
 % Due to delta Elevator
-U_DE        = LongTF(1,1);
-W_DE        = LongTF(2,1);
-Q_DE        = LongTF(3,1);
-THETA_DE    = LongTF(4,1);
+U_DE        = LongTF(1,1)
+W_DE        = LongTF(2,1)
+Q_DE        = LongTF(3,1)
+THETA_DE    = LongTF(4,1)
 % Due to delta Thrust
-U_DTH       = LongTF(1,2);
-W_DTH       = LongTF(2,2);
-Q_DTH       = LongTF(3,2);
-THETA_DTH   = LongTF(4,2);
+U_DTH       = LongTF(1,2)
+W_DTH       = LongTF(2,2)
+Q_DTH       = LongTF(3,2)
+THETA_DTH   = LongTF(4,2)
 
+
+%% APPROXIMATE 
+%% PHUGOID MODE (LONG PERIOD MODE)
+
+A_phug=[XU -g*cos(theta0)
+    ZU/(u0+ZQ) g*sin(theta0)];
+B_phug=[XDE XDTH
+    ZDE/(ZQ+u0) ZDTH/(ZQ+u0)];
+C_phug=eye(2);D_phug=zeros(2,2);
+
+PHUG_SS=ss(A_phug,B_phug,C_phug,D_phug);
+
+%% SHORT PERIOD MODE
+A_short=[ZW/(1-ZWD) (ZQ+u0)/(1-ZWD)
+    (MW+ZW*MWD/(1-ZWD)) (MQ+MWD*(ZQ+u0)/(1-ZWD))];
+B_short=[ZDE/(1-ZWD) ZDTH
+    MDE+MWD*ZDE/(1-ZWD) MDTH+MWD*ZDTH/(1-ZWD)];
+C_short=eye(2);D_short=zeros(2,2);
+
+SHORT_SS=ss(A_short,B_short,C_short,D_short);
 
 %% Plotting Longitudinal Full Linear Model Step Response
 %%% Due to delta_elevetor or delta_thrust
 dControl_long = dControl(3:4); % dE, dTh
 opt = stepDataOptions;
 opt.StepAmplitude = dControl_long;
-[res_dE, ~, res_dTh] = step(LongSS, time_V, opt);
+[res, ~, ~] = step(LongSS, time_V, opt);
+res_dE  =res(:,:,1);
+res_dTh =res(:,:,2);
+%% Plotting Longitudinal Long & Short Period Approximation Model Step Response
+%%% Due to delta_elevetor or delta_thrust
+dControl_long = dControl(3:4); % dE, dTh
+opt = stepDataOptions;
+opt.StepAmplitude = dControl_long;
 
-%% u response Full Linear
-figure;
+[APPres_PH, ~,~] = step(PHUG_SS, time_V, opt);
+[APPres_SH, ~,~] = step(SHORT_SS, time_V, opt);
+
+APPres_dE = zeros (length(time_V),4);
+APPres_dE(:,[1,4]) = APPres_PH(:,:,1);
+APPres_dE(:,[2,3]) = APPres_SH(:,:,1);
+
+APPres_dTH = zeros (length(time_V),4);
+APPres_dTH(:,[1,4]) = APPres_PH(:,:,2);
+APPres_dTH(:,[2,3]) = APPres_SH(:,:,2);
+%% u response Full Linear - Approximate - Non Linear 
+figure(1)
 if(dControl_long(1) ~= 0)
-    plot(time_V, res_dE(:, 1) + u0, '--', 'DisplayName', 'u (Full Linear)');  % Full Linear Model    
+    plot(time_V, res_dE(:, 1) + u0, '--', 'DisplayName', 'u (Full Linear)');  % Full Linear Model 
+    hold on
+    plot(time_V, APPres_dE(:, 1) + u0, '--', 'DisplayName', 'u (Long Period Approximation)');  % Approximate (long period Mode)     
 elseif(dControl_long(2) ~= 0)
     plot(time_V, res_dTh(:, 1) + u0, '--', 'DisplayName', 'u (Full Linear)');  % Full Linear Model
+    hold on
+    plot(time_V, APPres_dTH(:, 1) + u0, '--', 'DisplayName', 'u (Long Period Approximation)');  % Approximate (long period Mode)
 end
 
 hold on
 plot(time_V, u, '-', 'DisplayName', 'u (Non-Linear)');                  % Non-Linear Model
 title('u (ft/sec)'); xlabel('t (sec)');
 legend('show');
-
-%% w response Full Linear
-figure;
+grid on 
+%% w response Full Linear - Approximate - Non Linear 
+figure(2)
 if(dControl_long(1) ~= 0)
-    plot(time_V, res_dE(:, 2) + w0, '--', 'DisplayName', 'w (Full Linear)');  % Full Linear Model    
+    plot(time_V, res_dE(:, 2) + w0, '--', 'DisplayName', 'w (Full Linear)');  % Full Linear Model 
+    hold on 
+    plot(time_V, APPres_dE(:, 2) + w0, '--', 'DisplayName', 'w (short Period Approximation)');  % Approximate (short period Mode)
 elseif(dControl_long(2) ~= 0)
     plot(time_V, res_dTh(:, 2) + w0, '--', 'DisplayName', 'w (Full Linear)');  % Full Linear Model
+    hold on
+    plot(time_V, APPres_dTH(:, 2) + w0, '--', 'DisplayName', 'w (short Period Approximation)');  % Approximate (short period Mode)
 end
 
 hold on
 plot(time_V, w, '-', 'DisplayName', 'w (Non-Linear)');                  % Non-Linear Model
 title('w (ft/sec)'); xlabel('t (sec)');
 legend('show');
-
-%% q response Full Linear
-figure;
+grid on
+%% q response Full Linear - Approximate - Non Linear 
+figure(3)
 if(dControl_long(1) ~= 0)
     q_ = res_dE(:, 3) + q0;
-    plot(time_V, q_*180/pi, '--', 'DisplayName', 'q (Full Linear)');  % Full Linear Model    
+    plot(time_V, q_*180/pi, '--', 'DisplayName', 'q (Full Linear)');  % Full Linear Model
+    hold on
+    q_APP = APPres_dE(:, 3) + q0;
+    plot(time_V, q_APP*180/pi, '--', 'DisplayName', 'q (short Period Approximation)');  % Approximate (short period Mode)
+
 elseif(dControl_long(2) ~= 0)
     q_ = res_dTh(:, 3) + q0;
     plot(time_V, q_*180/pi, '--', 'DisplayName', 'q (Full Linear)');  % Full Linear Model
+    hold on
+    q_APP = APPres_dTH(:, 3) + q0;
+    plot(time_V, q_APP*180/pi, '--', 'DisplayName', 'q (short Period Approximation)');  % Approximate (short period Mode)
 end
 
 hold on
 plot(time_V, q_deg , '-', 'DisplayName', 'q (Non-Linear)');                  % Non-Linear Model
 title('q (deg/sec)'); xlabel('t (sec)');
 legend('show');
-
-%% theta response Full Linear
-figure;
+grid on
+%% theta response Full Linear - Approximate - Non Linear 
+figure(4)
 if(dControl_long(1) ~= 0)
     theta_ = (res_dE(:, 4) + theta0)*180/pi;
-    plot(time_V, theta_, '--', 'DisplayName', 'Theta (Full Linear)');  % Full Linear Model    
+    plot(time_V, theta_, '--', 'DisplayName', '\Theta (Full Linear)');  % Full Linear Model  
+    hold on
+    theta_APP = (APPres_dE(:, 4) + theta0)*180/pi;
+    plot(time_V, theta_APP, '--', 'DisplayName', '\Theta (Long Period Approximation)');  % Full Linear Model  
 elseif(dControl_long(2) ~= 0)
     theta_ = (res_dTh(:, 4) + theta0)*180/pi;
-    plot(time_V, theta_, '--', 'DisplayName', 'Theta (Full Linear)');  % Full Linear Model
+    plot(time_V, theta_, '--', 'DisplayName', '\Theta (Full Linear)');  % Full Linear Model
+    hold on
+    theta_APP = (APPres_dTH(:, 4) + theta0)*180/pi;
+    plot(time_V, theta_APP, '--', 'DisplayName', '\Theta (Long Period Approximation)');  % Full Linear Model      
 end
 
 hold on
-plot(time_V, theta_deg, '-', 'DisplayName', 'q (Non-Linear)');                  % Non-Linear Model
+plot(time_V, theta_deg, '-', 'DisplayName', '\Theta (Non-Linear)');                  % Non-Linear Model
 title('theta (deg/sec)'); xlabel('t (sec)');
 legend('show');
+grid on
 
 %% RootLocus & Bode Plots Full Linear Model
 %% u/de Full Linear
