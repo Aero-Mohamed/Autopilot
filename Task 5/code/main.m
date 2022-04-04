@@ -3,6 +3,7 @@ clc; clear; close all;
 %% Inputs 
 % Forces, Moments and Inertia
 plane = AirPlane("NT-33A_4.xlsx");
+
 steps = (plane.timeSpan(2) - plane.timeSpan(1))/plane.dt;
 Result = NaN(12, steps);
 Result(:,1) = plane.ICs;
@@ -49,6 +50,8 @@ psi_deg=psi*180/pi;
 % Two Inputs - Four Output Each
 [A_long, B_long, C_long, D_long] = plane.fullLinearModel();
 LongSS = ss(A_long, B_long, C_long, D_long);
+LongTF = tf(LongSS);
+THETA_DE = LongTF(4,1)
 
 %%% Due to delta_elevetor or delta_thrust
 opt = stepDataOptions;
