@@ -1,5 +1,5 @@
 function [Mass, g, I, invI, timeSpan, dt, ICs, ICs_dot0, Vt0, ...
-    dc, SD_Long, SD_Lat, initialGravity] = Input(inputs_filename)
+    dc, SD_Long, SD_Lat,SD_Lat_dash, initialGravity] = Input(inputs_filename)
     % Inputs 
     % here B2:B61 means read the excel sheet from cell B2 to cell B61
     aircraft_data=xlsread(inputs_filename,'B2:B61');

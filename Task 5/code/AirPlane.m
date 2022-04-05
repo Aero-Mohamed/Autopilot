@@ -20,7 +20,7 @@ classdef AirPlane < handle
        airPlaneDerivatives      % Class
        rigidBodySolver          % Class
        
-       u0, v0, w0, theta0,
+       u0, v0, w0, theta0, z0
        
     end
     
@@ -84,6 +84,7 @@ classdef AirPlane < handle
             airPlane.v0 = airPlane.ICs(2);
             airPlane.w0 = airPlane.ICs(3);
             airPlane.theta0 = airPlane.ICs(8);
+            airPlane.z0 = airPlane.ICs(12);
             
         end
         

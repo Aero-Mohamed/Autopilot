@@ -51,7 +51,8 @@ psi_deg=psi*180/pi;
 [A_long, B_long, C_long, D_long] = plane.fullLinearModel();
 LongSS = ss(A_long, B_long, C_long, D_long);
 LongTF = tf(LongSS);
-THETA_DE = LongTF(4,1)
+theta_dE = LongTF(4,1);
+q_dE = LongTF(3, 1);
 
 %%% Due to delta_elevetor or delta_thrust
 opt = stepDataOptions;
@@ -69,6 +70,28 @@ PHUG_SS = ss(A_phug,B_phug,C_phug,D_phug);
 [res, ~, ~] = step(PHUG_SS, time_V, opt);
 phug_res_dE = res(:, :, 1);
 phug_res_dTh = res(:, :, 2);
+
+
+%% Servo Transfer Function
+servo = tf(10,[1 10]);
+integrator = tf(1,[1 0]);
+differentiator = tf([1 0],1);
+engine_timelag = tf(0.1 , [1 0.1]);
+
+%% pitch control theta/theta_com
+% Open Loop TFs
+OL_theta_thetacom = -servo * theta_dE;
+designValues = matfile("designValues.mat");
+
+PD_tf = designValues.C2;
+PI_tf = designValues.C1;
+CL_theta_thetacom_tf = tf(designValues.IOTransfer_r2y);
+C_action_tf = tf(designValues.IOTransfer_r2u);
+
+f1=figure;
+step(CL_theta_thetacom_tf)
+f2=figure;
+step(C_action_tf)
 
 %% theta response Full Linear - Approximate - Non Linear 
 figure
