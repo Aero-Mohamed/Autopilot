@@ -23,10 +23,8 @@ for i =1:steps
         (plane.initialGravity + dForces), dMoments, plane.dControl ...
     );
     
-
     dForces = vpa(dF');
     dMoments = vpa(dM');
-    
 end
 %profile viewer
 
