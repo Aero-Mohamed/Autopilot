@@ -9,66 +9,12 @@ Result = NaN(12, steps);
 Result(:,1) = plane.ICs;
 time_V = linspace(0, plane.timeSpan(2), steps+1);
 
-%% Solving
-%profile on;
-dForces = [0 ; 0; 0];
-dMoments = [0 ; 0; 0];
-
-for i =1:steps
-    Result(:, i+1) = plane.rigidBodySolver.nextStep( ...
-        Result(:, i),(plane.initialGravity + dForces), dMoments ...
-    );    
-
-    [dF, dM] = plane.airFrame1(Result(:, i+1), ...
-        (plane.initialGravity + dForces), dMoments, plane.dControl ...
-    );
-    
-    dForces = vpa(dF');
-    dMoments = vpa(dM');
-end
-%profile viewer
-
-%% Rearranging Results
-u = Result(1,:); v = Result(2,:); w = Result(3,:);
-p = Result(4,:); q = Result(5,:); r = Result(6,:);
-phi = Result(7,:); theta = Result(8,:); psi = Result(9,:);
-x = Result(10,:); y = Result(11,:); z = Result(12,:);
-
-beta_deg=asin(v/plane.Vt0)*180/pi;
-alpha_deg=atan(w./u)*180/pi;
-p_deg=p*180/pi;
-q_deg=q*180/pi;
-r_deg=r*180/pi;
-phi_deg=phi*180/pi;
-theta_deg=theta*180/pi;
-psi_deg=psi*180/pi;
-
 %% Longitudenal Full Linear Model
 
 % Two Inputs - Four Output Each
 [A_long, B_long, C_long, D_long] = plane.fullLinearModel();
 LongSS = ss(A_long, B_long, C_long, D_long);
 LongTF = tf(LongSS);
-theta_dE = LongTF(4,1);
-q_dE = LongTF(3, 1);
-
-%%% Due to delta_elevetor or delta_thrust
-opt = stepDataOptions;
-opt.StepAmplitude = plane.dControl(3:4); % dE, dTh
-
-[res, ~, ~] = step(LongSS, time_V, opt);
-long_res_dE  = res(:,:,1);
-long_res_dTh = res(:,:,2);
-
-%% PHUGOID MODE (LONG PERIOD MODE)
-
-[A_phug, B_phug, C_phug, D_phug] = plane.longPeriodModel();
-PHUG_SS = ss(A_phug,B_phug,C_phug,D_phug);
-
-[res, ~, ~] = step(PHUG_SS, time_V, opt);
-phug_res_dE = res(:, :, 1);
-phug_res_dTh = res(:, :, 2);
-
 
 %% Servo Transfer Function
 servo = tf(10,[1 10]);
@@ -77,40 +23,51 @@ differentiator = tf([1 0],1);
 engine_timelag = tf(0.1 , [1 0.1]);
 
 %% pitch control theta/theta_com
-% Open Loop TFs
+theta_dE = LongTF(4,1);
 OL_theta_thetacom = -servo * theta_dE;
-designValues = matfile("designValues.mat");
+pitchControldesignValues = matfile("DesignValues/pitchControldesignValues.mat");
 
-PD_tf = designValues.C2;
-PI_tf = designValues.C1;
-CL_theta_thetacom_tf = tf(designValues.IOTransfer_r2y);
-C_action_tf = tf(designValues.IOTransfer_r2u);
+pitch_PD_tf = pitchControldesignValues.C2;
+pitch_PI_tf = pitchControldesignValues.C1;
+CL_theta_thetacom_tf = tf(pitchControldesignValues.IOTransfer_r2y);
+pitch_C_action_tf = tf(pitchControldesignValues.IOTransfer_r2u);
 
-f1=figure;
+figure;
 step(CL_theta_thetacom_tf)
-f2=figure;
-step(C_action_tf)
+figure;
+step(pitch_C_action_tf)
 
-%% theta response Full Linear - Approximate - Non Linear 
-figure
-if(plane.dControl(3) ~= 0)
-    % dE input
-    theta_ = (long_res_dE(:, 4) + plane.theta0)*180/pi;
-    plot(time_V, theta_, '--', 'DisplayName', '\Theta (Full Linear)');  % Full Linear Model  
-    hold on
-    theta_ = (phug_res_dE(:, 2) + plane.theta0)*180/pi;
-    plot(time_V, theta_, '--', 'DisplayName', '\Theta (Long Period Approximation)');  % Long Period
-elseif(plane.dControl(4) ~= 0)
-    % dTh input
-    theta_ = (long_res_dTh(:, 4) + plane.theta0)*180/pi;
-    plot(time_V, theta_, '--', 'DisplayName', '\Theta (Full Linear)');  % Full Linear Model
-    hold on
-    theta_ = (phug_res_dTh(:, 2) + plane.theta0)*180/pi;
-    plot(time_V, theta_, '--', 'DisplayName', '\Theta (Long Period Approximation)');  % Long Period
-end
+%% Velocity Controller u/u_com
+u_dTh = LongTF(1, 2);
+OL_u_ucom = u_dTh * servo * engine_timelag;
+velocityControldesignValues = matfile("DesignValues/velocityControldesignValues.mat");
 
-hold on
-plot(time_V, theta_deg, '-', 'DisplayName', '\Theta (Non-Linear)');                  % Non-Linear Model
-title('theta (deg/sec)'); xlabel('t (sec)');
-legend('show');
-grid on
+velocity_PD_tf = velocityControldesignValues.C2;
+velocity_PI_tf = velocityControldesignValues.C1;
+CL_u_ucom_tf = tf(velocityControldesignValues.IOTransfer_r2y);
+velocity_C_action_tf = tf(velocityControldesignValues.IOTransfer_r2u);
+
+figure;
+step(CL_u_ucom_tf)
+figure;
+step(altitude_C_action_tf)
+
+%% Altitude Controller h/h_com
+w_de = LongTF(2,1);
+theta_de = LongTF(4, 1);
+w_theta = minreal(w_de/theta_de);
+h_theta = -1 * integrator * (w_theta - plane.u0);
+OL_h_thetacom = minreal(CL_theta_thetacom_tf * h_theta);
+
+altitudeControldesignValues = matfile("DesignValues/altitudeControldesignValues.mat");
+
+altitude_PD_tf = altitudeControldesignValues.C2;
+altitude_PI_tf = altitudeControldesignValues.C1;
+CL_h_thetacom_tf = tf(altitudeControldesignValues.IOTransfer_r2y);
+altitude_C_action_tf = tf(altitudeControldesignValues.IOTransfer_r2u);
+
+figure;
+step(CL_h_thetacom_tf)
+figure;
+step(altitude_C_action_tf)
+
