@@ -151,6 +151,10 @@ classdef AirPlane < handle
             [A_long, B_long, C_long, D_long] = obj.airPlaneDerivatives.fullLinearModel(obj.ICs, obj.g);
         end
         
+        function [A_long, B_long, C_long, D_long] = lateralFullLinearModel(obj)
+            [A_long, B_long, C_long, D_long] = obj.airPlaneDerivatives.lateralFullLinearModel(obj.ICs, obj.g);
+        end
+        
         function [A_phug, B_phug, C_phug, D_phug] = longPeriodModel(obj)
             [A_phug, B_phug, C_phug, D_phug] = obj.airPlaneDerivatives.longPeriodModel(obj.ICs, obj.g);
         end

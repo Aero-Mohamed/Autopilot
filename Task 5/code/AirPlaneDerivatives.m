@@ -84,6 +84,31 @@ classdef AirPlaneDerivatives < handle
             
         end
         
+        function [A, B, C, D] = lateralFullLinearModel(obj, ICs, g)
+            
+            u0 = ICs(1);
+            v0 = ICs(2);
+            w0 = ICs(3);
+            theta0 = ICs(8);
+            
+            Vto = sqrt(u0^2 + v0^2 + w0^2);
+            Yp = 0;
+            Yr = 0;
+            
+            A = [obj.YB/Vto (Yp+w0)/Vto (Yr-u0)/Vto g*cos(theta0)/Vto 0;...
+                   obj.LBd obj.LPd obj.LRd 0 0;...
+                   obj.NBd obj.NPd obj.NRd 0 0;...
+                   0 1 tan(theta0) 0 0;...
+                   0 0 1/cos(theta0) 0 0];
+            B = [obj.YDA obj.YDR;...
+               obj.LDAd obj.LDRd;...
+               obj.NDAd obj.NDRd;...
+               0 0;0 0];
+            C = eye(5); D = zeros(5,2); 
+            
+        end
+        
+        
         function [A, B, C, D] = longPeriodModel(obj,ICs, g)
             u0 = ICs(1);
             

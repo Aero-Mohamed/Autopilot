@@ -9,6 +9,11 @@ Result = NaN(12, steps);
 Result(:,1) = plane.ICs;
 time_V = linspace(0, plane.timeSpan(2), steps+1);
 
+%% Lateral Full Linear Model 
+[A_lat, B_lat, C_lat, D_lat] = plane.lateralFullLinearModel();
+LatSS = ss(A_lat, B_lat, C_lat, D_lat);
+LatTF = tf(LatSS);
+
 %% Longitudenal Full Linear Model
 
 % Two Inputs - Four Output Each
@@ -42,17 +47,17 @@ u_dTh = LongTF(1, 2);
 OL_u_ucom = u_dTh * servo * engine_timelag;
 velocityControldesignValues = matfile("DesignValues/velocityControldesignValues.mat");
 
-velocity_PD_tf = velocityControldesignValues.C2;
-velocity_PI_tf = velocityControldesignValues.C1;
+velocity_C2_tf = velocityControldesignValues.C2;
+velocity_C1_tf = velocityControldesignValues.C1;
 CL_u_ucom_tf = tf(velocityControldesignValues.IOTransfer_r2y);
 velocity_C_action_tf = tf(velocityControldesignValues.IOTransfer_r2u);
 
 figure;
 step(CL_u_ucom_tf)
 figure;
-step(altitude_C_action_tf)
+step(velocity_C_action_tf)
 
-%% Altitude Controller h/h_com
+%% Altitude Controller h/thetacom
 w_de = LongTF(2,1);
 theta_de = LongTF(4, 1);
 w_theta = minreal(w_de/theta_de);
@@ -61,8 +66,8 @@ OL_h_thetacom = minreal(CL_theta_thetacom_tf * h_theta);
 
 altitudeControldesignValues = matfile("DesignValues/altitudeControldesignValues.mat");
 
-altitude_PD_tf = altitudeControldesignValues.C2;
-altitude_PI_tf = altitudeControldesignValues.C1;
+altitude_C2_tf = altitudeControldesignValues.C2;
+altitude_C1_tf = altitudeControldesignValues.C1;
 CL_h_thetacom_tf = tf(altitudeControldesignValues.IOTransfer_r2y);
 altitude_C_action_tf = tf(altitudeControldesignValues.IOTransfer_r2u);
 
