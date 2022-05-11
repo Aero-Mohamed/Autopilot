@@ -26,17 +26,37 @@ LatTF = tf(LatSS);
 R_DR_L = LatTF(3, 2);
 OL_r_rcom=servo*R_DR_L;
 
-yawDamperControldesignValues = matfile("DesignValues/yawDamperControlDesignValues-Design1.mat");
+yawDamperControldesignValues = matfile("DesignValues/yawDamperControlDesignValues-Design2.mat");
 
-yaw_C2_tf = yawDamperControldesignValues.C2;
-yaw_C1_tf = yawDamperControldesignValues.C1;
+yaw_C_tf = yawDamperControldesignValues.C;
 CL_r_rcom_tf = tf(yawDamperControldesignValues.IOTransfer_r2y);
 yaw_C_action_tf = tf(yawDamperControldesignValues.IOTransfer_r2u);
 
+
 figure;
-impulse(CL_r_rcom_tf)
+impulse(yaw_C_action_tf);
+title('r/r_{com} Control Action');
 figure;
-impulse(yaw_C_action_tf)
+impulse(CL_r_rcom_tf);
+
+%% Design a "Roll Controller"
+
+LatSSYawDamped = feedback(servo * LatSS, yaw_C_tf, 2, 3, 1);
+LatTFYawDamped = tf(LatSSYawDamped);
+checking_r_rcom_tf = LatTFYawDamped(3, 2);
+hold on
+impulse(checking_r_rcom_tf, 'r--');
+title('r/r_{com} - With Controller Vs. New Lat SS');
+hold off
+
+phi_da = minreal(servo * LatTFYawDamped(4, 1));
+
+rollControldesignValues = matfile("DesignValues/rollControllerValues.mat");
+
+roll_C_tf = rollControldesignValues.C;
+CL_roll_tf = tf(rollControldesignValues.IOTransfer_r2y);
+roll_C_action_tf = tf(rollControldesignValues.IOTransfer_r2u);
+
 
 
 %% 
