@@ -3,6 +3,7 @@ clc; clear; close all;
 %% Inputs 
 % Initial AirPlane
 plane = AirPlane("NT-33A_4.xlsx");
+stability_matrix = plane.SM;
 
 %% Initial Important Variables
 steps = (plane.timeSpan(2) - plane.timeSpan(1))/plane.dt;
