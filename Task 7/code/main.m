@@ -1,11 +1,73 @@
 clc; clear; close all;
 
-%% Inputs 
+%% Inputs  
+% Note: Run before Runing Simulink Model
 % Initial AirPlane
-plane = AirPlane("excelsheet_data_modified.xlsx");
+
+plane = AirPlane("NT-33A_4.xlsx");
 stability_matrix = plane.SM;
 
-%% Plotter
+%% Initial Important Transfer Function
+% Note: Run before Runing Simulink Model
+
+servo = tf(10,[1 10]);
+integrator = tf(1,[1 0]);
+differentiator = tf([1 0],1);
+engine_timelag = tf(0.1 , [1 0.1]);
+
+%% D. Test the “Altitude Hold” controller and compare the response with the same test on the State space model
+D_linear = load('./Results/linear_simulation_1000ft_altitude_hold.mat');
+D_non_linear = load('./Results/nonlinear_simulation_1000ft_altitude_hold.mat');
+
+figure
+plot(D_linear.delta_theta.Time, D_linear.delta_theta.Data, '--b', 'LineWidth', 2);
+hold on
+plot(D_non_linear.delta_theta.Time, D_non_linear.delta_theta.Data, '-r', 'LineWidth', 2);
+xlim([0 40]);
+legend('Linear Model', 'Non Linear Model');
+title('{\delta}{\theta}');
+
+figure
+plot(D_linear.delta_u.Time, D_linear.delta_u.Data, '--b', 'LineWidth', 2);
+hold on
+plot(D_non_linear.delta_u.Time, D_non_linear.delta_u.Data, '-r', 'LineWidth', 2);
+legend('Linear Model', 'Non Linear Model');
+title('{\delta}{u}');
+
+figure
+plot(D_linear.gamma.Time, D_linear.gamma.Data, '--b', 'LineWidth', 2);
+hold on
+plot(D_non_linear.gamma.Time, D_non_linear.gamma.Data, '-r', 'LineWidth', 2);
+xlim([0 40]);
+legend('Linear Model', 'Non Linear Model');
+title('{\delta}{\gamma}');
+
+figure
+plot(D_linear.altitude.Time, D_linear.altitude.Data, '--b', 'LineWidth', 2);
+hold on
+plot(D_non_linear.altitude.Time, D_non_linear.altitude.Data, '-r', 'LineWidth', 2);
+xlim([0 40]);
+legend('Linear Model', 'Non Linear Model');
+title('{altitude} {ft}');
+
+figure
+plot(D_linear.delta_E.Time, D_linear.delta_E.Data, '--b', 'LineWidth', 2);
+hold on
+plot(D_non_linear.delta_E.Time, D_non_linear.delta_E.Data, '-r', 'LineWidth', 2);
+xlim([0 40]);
+legend('Linear Model', 'Non Linear Model');
+title('{\delta}{Elevetor}');
+
+figure
+plot(D_linear.delta_TH.Time, D_linear.delta_TH.Data, '--b', 'LineWidth', 2);
+hold on
+plot(D_non_linear.delta_TH.Time, D_non_linear.delta_TH.Data, '-r', 'LineWidth', 2);
+xlim([0 40]);
+legend('Linear Model', 'Non Linear Model');
+title('{\delta}{Thrust}');
+
+
+%% Plotter Note: Run After running simulation to draw results
 u = uvw.Data(:,1);
 v = uvw.Data(:,2);
 w = uvw.Data(:,3);
@@ -30,7 +92,7 @@ theta_deg = theta*180/pi;
 psi_deg = psi*180/pi;
 
 figure
-plot3(x,y,z);
+plot3(x,-y,-z);
 title('Trajectory')
 figure
 subplot(4,3,1)
@@ -81,116 +143,3 @@ subplot(4,3,12)
 plot(uvw.Time,z)
 title('z (ft)')
 xlabel('time (sec)')
-
-
-%% Initial Important Variables
-steps = (plane.timeSpan(2) - plane.timeSpan(1))/plane.dt;
-Result = NaN(12, steps);
-Result(:,1) = plane.ICs;
-time_V = linspace(0, plane.timeSpan(2), steps+1);
-
-%% Initial Important Transfer Function
-servo = tf(10,[1 10]);
-integrator = tf(1,[1 0]);
-differentiator = tf([1 0],1);
-engine_timelag = tf(0.1 , [1 0.1]);
-
-%%
-%%%%%%%%%%%%%%%%%%% Lateral Full Linear Model %%%%%%%%%%%%%%%%%%%
-[A_lat, B_lat, C_lat, D_lat] = plane.lateralFullLinearModel();
-LatSS = ss(A_lat, B_lat, C_lat, D_lat);
-LatTF = tf(LatSS);
-
-%% Design a “Yaw damper” for the Dutch roll mode
-R_DR_L = LatTF(3, 2);
-OL_r_rcom=servo*R_DR_L;
-
-yawDamperControldesignValues = matfile("DesignValues/yawDamperControlDesignValues-Design2.mat");
-
-yaw_C_tf = yawDamperControldesignValues.C;
-CL_r_rcom_tf = tf(yawDamperControldesignValues.IOTransfer_r2y);
-yaw_C_action_tf = tf(yawDamperControldesignValues.IOTransfer_r2u);
-
-
-figure;
-impulse(yaw_C_action_tf);
-title('r/r_{com} Control Action');
-figure;
-impulse(CL_r_rcom_tf);
-
-%% Design a "Roll Controller"
-
-LatSSYawDamped = feedback(servo * LatSS, yaw_C_tf, 2, 3, 1);
-LatTFYawDamped = tf(LatSSYawDamped);
-checking_r_rcom_tf = LatTFYawDamped(3, 2);
-hold on
-impulse(checking_r_rcom_tf, 'r--');
-title('r/r_{com} - With Controller Vs. New Lat SS');
-hold off
-
-phi_da = minreal(servo * LatTFYawDamped(4, 1));
-
-rollControldesignValues = matfile("DesignValues/rollControllerValues.mat");
-
-roll_C_tf = rollControldesignValues.C;
-CL_roll_tf = tf(rollControldesignValues.IOTransfer_r2y);
-roll_C_action_tf = tf(rollControldesignValues.IOTransfer_r2u);
-
-
-
-%% 
-%%%%%%%%%%%%%%%%%%% Longitudenal Full Linear Model %%%%%%%%%%%%%%%%%%%
-% Two Inputs - Four Output Each
-[A_long, B_long, C_long, D_long] = plane.fullLinearModel();
-LongSS = ss(A_long, B_long, C_long, D_long);
-LongTF = tf(LongSS);
-
-%% pitch control theta/theta_com
-theta_dE = LongTF(4,1);
-OL_theta_thetacom = -servo * theta_dE;
-pitchControldesignValues = matfile("DesignValues/pitchControldesignValues.mat");
-
-pitch_PD_tf = pitchControldesignValues.C2;
-pitch_PI_tf = pitchControldesignValues.C1;
-CL_theta_thetacom_tf = tf(pitchControldesignValues.IOTransfer_r2y);
-pitch_C_action_tf = tf(pitchControldesignValues.IOTransfer_r2u);
-
-% figure;
-% step(CL_theta_thetacom_tf)
-% figure;
-% step(pitch_C_action_tf)
-
-%% Velocity Controller u/u_com
-u_dTh = LongTF(1, 2);
-OL_u_ucom = u_dTh * servo * engine_timelag;
-velocityControldesignValues = matfile("DesignValues/velocityControldesignValues.mat");
-
-velocity_C2_tf = velocityControldesignValues.C2;
-velocity_C1_tf = velocityControldesignValues.C1;
-CL_u_ucom_tf = tf(velocityControldesignValues.IOTransfer_r2y);
-velocity_C_action_tf = tf(velocityControldesignValues.IOTransfer_r2u);
-
-% figure;
-% step(CL_u_ucom_tf)
-% figure;
-% step(velocity_C_action_tf)
-
-%% Altitude Controller h/thetacom
-w_de = LongTF(2,1);
-theta_de = LongTF(4, 1);
-w_theta = minreal(w_de/theta_de);
-h_theta = -1 * integrator * (w_theta - plane.u0);
-OL_h_thetacom = minreal(CL_theta_thetacom_tf * h_theta);
-
-altitudeControldesignValues = matfile("DesignValues/altitudeControldesignValues.mat");
-
-altitude_C2_tf = altitudeControldesignValues.C2;
-altitude_C1_tf = altitudeControldesignValues.C1;
-CL_h_thetacom_tf = tf(altitudeControldesignValues.IOTransfer_r2y);
-altitude_C_action_tf = tf(altitudeControldesignValues.IOTransfer_r2u);
-
-% figure;
-% step(CL_h_thetacom_tf)
-% figure;
-% step(altitude_C_action_tf)
-
