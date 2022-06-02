@@ -15,57 +15,6 @@ integrator = tf(1,[1 0]);
 differentiator = tf([1 0],1);
 engine_timelag = tf(0.1 , [1 0.1]);
 
-%% D. Test the “Altitude Hold” controller and compare the response with the same test on the State space model
-D_linear = load('./Results/linear_simulation_1000ft_altitude_hold.mat');
-D_non_linear = load('./Results/nonlinear_simulation_1000ft_altitude_hold.mat');
-
-figure
-plot(D_linear.delta_theta.Time, D_linear.delta_theta.Data, '--b', 'LineWidth', 2);
-hold on
-plot(D_non_linear.delta_theta.Time, D_non_linear.delta_theta.Data, '-r', 'LineWidth', 2);
-xlim([0 40]);
-legend('Linear Model', 'Non Linear Model');
-title('{\delta}{\theta}');
-
-figure
-plot(D_linear.delta_u.Time, D_linear.delta_u.Data, '--b', 'LineWidth', 2);
-hold on
-plot(D_non_linear.delta_u.Time, D_non_linear.delta_u.Data, '-r', 'LineWidth', 2);
-legend('Linear Model', 'Non Linear Model');
-title('{\delta}{u}');
-
-figure
-plot(D_linear.gamma.Time, D_linear.gamma.Data, '--b', 'LineWidth', 2);
-hold on
-plot(D_non_linear.gamma.Time, D_non_linear.gamma.Data, '-r', 'LineWidth', 2);
-xlim([0 40]);
-legend('Linear Model', 'Non Linear Model');
-title('{\delta}{\gamma}');
-
-figure
-plot(D_linear.altitude.Time, D_linear.altitude.Data, '--b', 'LineWidth', 2);
-hold on
-plot(D_non_linear.altitude.Time, D_non_linear.altitude.Data, '-r', 'LineWidth', 2);
-xlim([0 40]);
-legend('Linear Model', 'Non Linear Model');
-title('{altitude} {ft}');
-
-figure
-plot(D_linear.delta_E.Time, D_linear.delta_E.Data, '--b', 'LineWidth', 2);
-hold on
-plot(D_non_linear.delta_E.Time, D_non_linear.delta_E.Data, '-r', 'LineWidth', 2);
-xlim([0 40]);
-legend('Linear Model', 'Non Linear Model');
-title('{\delta}{Elevetor}');
-
-figure
-plot(D_linear.delta_TH.Time, D_linear.delta_TH.Data, '--b', 'LineWidth', 2);
-hold on
-plot(D_non_linear.delta_TH.Time, D_non_linear.delta_TH.Data, '-r', 'LineWidth', 2);
-xlim([0 40]);
-legend('Linear Model', 'Non Linear Model');
-title('{\delta}{Thrust}');
-
 
 %% Plotter Note: Run After running simulation to draw results
 u = uvw.Data(:,1);
@@ -140,6 +89,6 @@ plot(uvw.Time,y)
 title('y (ft)')
 xlabel('time (sec)')
 subplot(4,3,12)
-plot(uvw.Time,z)
+plot(uvw.Time,-z)
 title('z (ft)')
 xlabel('time (sec)')

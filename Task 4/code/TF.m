@@ -6,7 +6,7 @@ close all
 % global aircraft_derivatives_dimensions 
 filename_density_L = 'NT-33A_4.xlsx'; %%put here the location of your excel sheet
 
-aircraft_data=xlsread(filename_density_L,'B2:B61');%% here B2:B61 means read the excel sheet from cell B2 to cell B61
+aircraft_data = xlsread(filename_density_L,'B2:B61');%% here B2:B61 means read the excel sheet from cell B2 to cell B61
 
 %%in the next step we will read from the vector(aircraft_data) but take care of the order the values in excel sheet is arranged
 % initial conditions

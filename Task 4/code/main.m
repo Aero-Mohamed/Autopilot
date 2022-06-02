@@ -95,7 +95,8 @@ A_phug=[XU -g
     -ZU/(u0+ZQ) 0];
 B_phug=[XDE XDTH
     -ZDE/(ZQ+u0) -ZDTH/(ZQ+u0)];
-C_phug=eye(2);D_phug=zeros(2,2);
+C_phug=eye(2);
+D_phug=zeros(2,2);
 
 PHUG_SS=ss(A_phug,B_phug,C_phug,D_phug);
 
@@ -241,7 +242,7 @@ A_Lat=[Yb/Vto (Yp+W0)/Vto (Yr-U0)/Vto g*cos(TH0)/Vto 0;...
        Nbd Npd Nrd 0 0;...
        0 1 tan(TH0) 0 0;...
        0 0 1/cos(TH0) 0 0];
-B_Lat=[YDa YDr;...
+B_Lat=[YDa_star YDr_star;...
        LDad LDrd;...
        NDad NDrd;...
        0 0;0 0];
@@ -462,4 +463,4 @@ title('\psi (deg/sec)'); xlabel('t (sec)');
 legend('show');
 grid on
 
-export_figure(max(double(get(groot,'Children')))+[-8:0], '', {'t1', 't2','t3','t4','t5','t6','t7','t8','t9'}, 600, {'emf', 'emf','emf','emf','emf','emf','emf','emf','emf'})
+%export_figure(max(double(get(groot,'Children')))+[-8:0], '', {'t1', 't2','t3','t4','t5','t6','t7','t8','t9'}, 600, {'emf', 'emf','emf','emf','emf','emf','emf','emf','emf'})
